@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
+from mpl_toolkits.mplot3d import Axes3D
 
-def genTestData(M, V, N):
+def genTestData(M, V, N, random_colors):
     """
     genTestData: takes in parameters specifying multivariate Gaussian distributions. Draws the specified
                 number of observations from each distribution and returns the combined, shuffled data.
@@ -23,20 +24,38 @@ def genTestData(M, V, N):
     c, k = np.shape(M)
     X = np.zeros((n, k))
     
+    colors = np.zeros((n, 3))
+    
     # Draw from each distribution
     index = 0
     for i in range(len(N)):
         group_n = N[i]
-        X[index:(index+group_n)] = np.random.multivariate_normal(M[i], V[i], N[i])
+        nextData = np.random.multivariate_normal(M[i], V[i], N[i])
+        X[index:(index+group_n)] = nextData
+        colors[index:(index+group_n), :] = np.tile(random_colors[i, :], reps=(group_n, 1))
         index += group_n
     
+    # Display
+    if k in [1, 2]:
+        plt.scatter(X[:,0], X[:,1], c=colors)
+        plt.show()            
+
+    elif k==3:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(X[:,0], X[:,1], X[:,2], c=colors)
+        plt.show()
+    
+    else:
+        print("Does not display " + str(k) + " dimensional data") 
+
     # Mix and return
     np.random.shuffle(X)
     return(X)
 
-    
 
-def softKmeans(X, c, maxIters=50, b=1.0, plot=True):
+
+def softKmeans(X, c, random_colors, maxIters=50, b=1.0, plot=True):
     """
     softKmeans: given input data X, calculates cluster centers M, and responsibility matrix R. Plots it plot=True.
 
@@ -82,20 +101,30 @@ def softKmeans(X, c, maxIters=50, b=1.0, plot=True):
         if (its == maxIters or abs(cost-oldCost)<0.05): break
 
     if plot:
-        random_colors = np.random.random((c, 3))
+        # random_colors = np.random.random((c, 3))
         colors = R.dot(random_colors)
-        plt.scatter(X[:,0], X[:,1], c=colors)
-        plt.show()
+        if k in [1, 2]:
+            plt.scatter(X[:,0], X[:,1], c=colors)
+            plt.show()            
+
+        elif k==3:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            ax.scatter(X[:,0], X[:,1], X[:,2], c=colors)
+            plt.show()
+        
+        else:
+            print("Does not display " + str(k) + " dimensional data")
 
     return(R, M)
 
 if __name__ == '__main__':
     
-    # Generate data
+    # 2D
     M = np.array([ 
-                [1, 1],
-                [5, 1],
-                [5, 5]
+                [0, 0],
+                [10, 0],
+                [10, 10]
                 ])
     
     V = np.array([
@@ -105,8 +134,33 @@ if __name__ == '__main__':
                 ])
 
     N = np.array([50, 50, 50])
-    X = genTestData(M, V, N)
+    c, _ = M.shape
+    random_colors = np.random.random((c, 3))
     
+    # Generate data
+    X = genTestData(M, V, N, random_colors=random_colors)
     #  Soft k means
-    R, M = softKmeans(X, c=3)
+    R, M = softKmeans(X, c=3, random_colors=random_colors)
+
+    # 3D
+    M = np.array([ 
+                [0, 0, 0],
+                [10, 0, 0],
+                [0, 10, 0]
+                ])
+    
+    V = np.array([
+                [ [10, 0, 0], [0, 1, 0], [0, 0, 10] ],
+                [ [1, 0, 0], [0, 1, 0], [0, 0, 1] ],
+                [ [1, 0, 0], [0, 1, 0], [0, 0, 1] ]
+                ])
+
+    N = np.array([50, 50, 50])
+    c, _ = M.shape
+    random_colors = np.random.random((c, 3))
+
+    # Generate data
+    X = genTestData(M, V, N, random_colors=random_colors)
+    #  Soft k means
+    R, M = softKmeans(X, c=3, random_colors=random_colors)
 # EOF
