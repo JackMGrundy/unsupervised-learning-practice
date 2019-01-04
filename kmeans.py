@@ -2,57 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
 from mpl_toolkits.mplot3d import Axes3D
-
-def genTestData(M, V, N, random_colors):
-    """
-    genTestData: takes in parameters specifying multivariate Gaussian distributions. Draws the specified
-                number of observations from each distribution and returns the combined, shuffled data.
-
-                c: num clusters
-                k: num features
-                n: number of data points
-    Args:
-        M (numpy array): c by k matrix specifying the cluster means
-        V (numpy array): c by k by k matrix specifying the covariance matrix for each Gaussian
-        N (numpy array): c by 1 vector specifying number of data points generate by each distribution
-
-    Returns:
-        X: (numpy array): n by k matrix of shuffled data points
-    """
-    # Housekeeping
-    n = np.sum(N)
-    c, k = np.shape(M)
-    X = np.zeros((n, k))
-    
-    colors = np.zeros((n, 3))
-    
-    # Draw from each distribution
-    index = 0
-    for i in range(len(N)):
-        group_n = N[i]
-        nextData = np.random.multivariate_normal(M[i], V[i], N[i])
-        X[index:(index+group_n)] = nextData
-        colors[index:(index+group_n), :] = np.tile(random_colors[i, :], reps=(group_n, 1))
-        index += group_n
-    
-    # Display
-    if k in [1, 2]:
-        plt.scatter(X[:,0], X[:,1], c=colors)
-        plt.show()            
-
-    elif k==3:
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(X[:,0], X[:,1], X[:,2], c=colors)
-        plt.show()
-    
-    else:
-        print("Does not display " + str(k) + " dimensional data") 
-
-    # Mix and return
-    np.random.shuffle(X)
-    return(X)
-
+from clusters import gaussianClusters
 
 
 def softKmeans(X, c, random_colors, maxIters=50, b=1.0, plot=True):
@@ -138,7 +88,7 @@ if __name__ == '__main__':
     random_colors = np.random.random((c, 3))
     
     # Generate data
-    X = genTestData(M, V, N, random_colors=random_colors)
+    X = gaussianClusters(M, V, N, random_colors=random_colors)
     #  Soft k means
     R, M = softKmeans(X, c=3, random_colors=random_colors)
 
@@ -160,7 +110,7 @@ if __name__ == '__main__':
     random_colors = np.random.random((c, 3))
 
     # Generate data
-    X = genTestData(M, V, N, random_colors=random_colors)
+    X = gaussianClusters(M, V, N, random_colors=random_colors)
     #  Soft k means
     R, M = softKmeans(X, c=3, random_colors=random_colors)
 # EOF
