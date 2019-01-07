@@ -72,6 +72,7 @@ def simpleEvolutionSimulation(numAncestors, k, numChildren, numGenerations, muta
     ancestors = np.floor(np.random.rand(numAncestors, k)*4)+1
 
     for g in range(numGenerations):
+        print("generation: " + str(g))
         if g==0: 
             children = nextGen(parents=ancestors, numChildren=numChildren, mutateRate=mutateRate, surivorLimit=survivorLimit)
         else:
@@ -97,7 +98,7 @@ def randomGaussianClusters():
 
 if __name__ == '__main__':
     # Run simple evolution simulation
-    ancestors, children = simpleEvolutionSimulation(numAncestors=10, k=1000, numChildren=10, numGenerations=5, mutateRate=.03, survivorLimit=100)
+    ancestors, children = simpleEvolutionSimulation(numAncestors=4, k=1000, numChildren=40, numGenerations=5, mutateRate=.04, survivorLimit=1000)
 
     # Test agglomerative clustering's ability to recover ancestor clusters
     # Highly sensitive to mutation rate

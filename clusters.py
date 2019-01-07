@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
 from mpl_toolkits.mplot3d import Axes3D
 import random
-
+from sklearn.datasets import make_spd_matrix
+import math 
+from sklearn.datasets.samples_generator import make_blobs
 
 def uniformRandomSum(s, n):
     """
@@ -66,16 +68,15 @@ def gaussianClusterParams(c, k, n, minMean, maxMean, minVar, maxVar, stretch="ci
 
     # Randomly generate symmetric matrix with values in range
     elif (stretch=="ellipse"):
-        V = np.random.rand(c, k, k)
-        V = (V + V.swapaxes(1, 2))/2.0 #make symmetric
-        V = V*maxVar+minVar # Scale 
+        V = np.zeros((c, k, k))
+        for i in range(c):
+            V[i, :, :] = make_spd_matrix(k)*maxVar
     
     else:
         print("Invalid stretch setting")
         return
 
     return M, V, N
-
 
 
 def gaussianClusters(M, V, N, random_colors=None, plot=True):
@@ -113,10 +114,13 @@ def gaussianClusters(M, V, N, random_colors=None, plot=True):
     
     # Display
     if plot:
-        if k in [1, 2]:
-            plt.scatter(X[:,0], X[:,1], c=colors)
+        if k==1:
+            print(X.shape)
+            plt.hist(X[:,0], bins=math.ceil(np.amax(X)))
+            plt.show() 
+        elif k==2:
+            plt.scatter(X[:,0], X[:,1], c=colors, alpha=.5)
             plt.show()            
-
         elif k==3:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
